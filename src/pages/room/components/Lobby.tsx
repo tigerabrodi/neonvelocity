@@ -51,14 +51,14 @@ const PlayerSlot = ({ player, index, isOwner, currentUserId, onKickPlayer }: Pla
       {/* Player Number/Color */}
       <div
         className={cn(
-          'flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold',
+          'flex h-8 w-8 items-center justify-center rounded-full border-2 p-0.5 text-sm font-bold',
           {
             'border-muted text-muted-foreground': isEmpty,
             [`border-current ${getPlayerSlotColor(index)} ${getPlayerGlow(index)}`]: !isEmpty,
           }
         )}
       >
-        {index + 1}
+        {player?.playerNumber}
       </div>
 
       {/* Player Info */}
@@ -68,7 +68,7 @@ const PlayerSlot = ({ player, index, isOwner, currentUserId, onKickPlayer }: Pla
         ) : (
           <div className="flex items-center gap-2">
             <span className="text-foreground font-medium">{player.playerName}</span>
-            {isPlayerOwner && <Crown className="text-neon-yellow h-4 w-4" />}
+            {isPlayerOwner && <Crown className="text-neon-yellow mb-1.5 h-4 w-4" />}
             {isCurrentPlayer && !isPlayerOwner && (
               <span className="text-primary text-xs">(You)</span>
             )}
