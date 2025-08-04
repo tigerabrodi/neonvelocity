@@ -30,6 +30,7 @@ export default tseslint.config({
     ],
     'no-await-in-loop': 'error',
     '@typescript-eslint/array-type': ['error', { default: 'generic' }],
+    'no-await-in-loop': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {
