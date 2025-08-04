@@ -33,6 +33,21 @@ export const getUserByEmail = query({
 })
 
 /**
+ * Get user by username
+ */
+export const getUserByUsername = query({
+  args: {
+    username: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('users')
+      .withIndex('by_username', (q) => q.eq('username', args.username))
+      .first()
+  },
+})
+
+/**
  * Get user by ID (internal use only)
  */
 export const getUserById = internalQuery({
