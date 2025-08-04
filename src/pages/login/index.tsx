@@ -23,7 +23,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && user && user.roomId) {
-      void navigate(generatePath(ROUTES.room, { roomId: user.roomId }))
+      void navigate(generatePath(ROUTES.roomDetail, { roomId: user.roomId }))
     }
   }, [isLoading, user, navigate])
 

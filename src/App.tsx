@@ -12,7 +12,7 @@ export function App() {
       <Routes>
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route element={<AuthenticatedLayout />}>
-          <Route path={ROUTES.room} element={<RoomPage />} />
+          <Route path={ROUTES.roomDetail} element={<RoomPage />} />
         </Route>
       </Routes>
       <Toaster />
