@@ -3,11 +3,12 @@ import { Doc, Id } from '@convex/_generated/dataModel'
 import { useMutation, useQuery } from 'convex/react'
 import { Check, Copy, Crown, Users, X } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { useRoomAccess } from '../hooks/useRoomAccess'
 
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, getErrorMessage, handlePromise } from '@/lib/utils'
 
 const DEFAULT_ROOM_DURATION_MS = 60000
 
@@ -103,6 +104,7 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
   const players = useQuery(api.rooms.queries.getPlayersInRoom, { roomId: room._id })
   const startGame = useMutation(api.games.mutations.startGame)
   const kickPlayer = useMutation(api.rooms.mutations.kickPlayer)
+  const leaveRoom = useMutation(api.rooms.mutations.leaveRoom)
 
   useRoomAccess({ roomId: room._id })
 
@@ -120,27 +122,44 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
   const handleStartGame = async () => {
     if (!isOwner || !canStart) return
 
-    try {
-      await startGame({
+    const [error] = await handlePromise(
+      startGame({
         roomId: room._id,
         ownerId: currentUser._id,
         durationMs: DEFAULT_ROOM_DURATION_MS,
       })
-    } catch (error) {
-      console.error('Failed to start game:', error)
+    )
+
+    if (error) {
+      toast.error(getErrorMessage({ error, fallbackText: 'Failed to start game' }))
+      return
     }
   }
 
   const handleKickPlayer = async (targetUserId: Id<'users'>) => {
     if (!isOwner) return
 
-    try {
-      await kickPlayer({
+    const [error] = await handlePromise(
+      kickPlayer({
         roomId: room._id,
         targetUserId,
       })
-    } catch (error) {
-      console.error('Failed to kick player:', error)
+    )
+
+    if (error) {
+      toast.error(getErrorMessage({ error, fallbackText: 'Failed to kick player' }))
+    }
+  }
+
+  const handleLeaveRoom = async () => {
+    const [error] = await handlePromise(
+      leaveRoom({
+        roomId: room._id,
+      })
+    )
+
+    if (error) {
+      toast.error(getErrorMessage({ error, fallbackText: 'Failed to leave room' }))
     }
   }
 
@@ -148,7 +167,7 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
   const sortedPlayers = players?.sort((a, b) => a.playerNumber - b.playerNumber) || []
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-6">
+    <div className="m-auto flex w-full max-w-md flex-col gap-6">
       {/* Room Info */}
       <div className="flex flex-col gap-2 text-center">
         <h2 className="text-primary text-2xl font-bold">RACING LOBBY</h2>
@@ -212,6 +231,19 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
           <p className="text-muted-foreground text-center text-xs">
             Need at least 2 players to start
           </p>
+        </div>
+      )}
+
+      {/* Leave Room Button */}
+      {!isOwner && (
+        <div className="flex flex-col gap-3">
+          <Button
+            variant="outline"
+            className="border-destructive/30 hover:border-destructive text-destructive hover:bg-destructive/10 w-full"
+            onClick={handleLeaveRoom}
+          >
+            Leave Room
+          </Button>
         </div>
       )}
     </div>

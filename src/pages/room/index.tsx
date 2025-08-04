@@ -31,5 +31,5 @@ export const RoomPage = () => {
 
   const shouldShowLobby = room.status === 'lobby'
 
-  return <div>{shouldShowLobby ? <Lobby room={room} currentUser={currentUser} /> : <Game />}</div>
+  return shouldShowLobby ? <Lobby room={room} currentUser={currentUser} /> : <Game />
 }
