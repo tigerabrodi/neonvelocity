@@ -22,8 +22,8 @@ export function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isLoading && user) {
-      void navigate(generatePath(ROUTES.home))
+    if (!isLoading && user && user.roomId) {
+      void navigate(generatePath(ROUTES.room, { roomId: user.roomId }))
     }
   }, [isLoading, user, navigate])
 
@@ -40,7 +40,7 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center gap-1">
           <CardTitle className="text-primary flex items-center justify-center gap-2 text-center text-2xl">
-            Your app name...
+            Neon Velocity
           </CardTitle>
         </CardHeader>
         <CardContent>

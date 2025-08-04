@@ -18,6 +18,7 @@ type FormState =
       status: 'error'
       errors: {
         email: string
+        username: string
         password: string
       }
     }
@@ -32,11 +33,13 @@ export function RegisterForm() {
   const [state, formAction, isPending] = useActionState<FormState, FormData>(
     async (_, formData) => {
       const email = formData.get('email') as string
+      const username = formData.get('username') as string
       const password = formData.get('password') as string
       const confirmPassword = formData.get('confirmPassword') as string
 
       const errors = {
         email: '',
+        username: '',
         password: '',
       }
 
@@ -64,6 +67,20 @@ export function RegisterForm() {
         return { status: 'error', errors }
       }
 
+      const [existingUsernameError, existingUsername] = await handlePromise(
+        convex.query(api.users.queries.getUserByUsername, { username })
+      )
+
+      if (existingUsernameError) {
+        errors.username = 'Something went wrong during registration. Please try later.'
+        return { status: 'error', errors }
+      }
+
+      if (existingUsername) {
+        errors.username = 'Username already exists'
+        return { status: 'error', errors }
+      }
+
       const [error] = await handlePromise(signIn('password', formData))
 
       if (error) {
@@ -74,7 +91,7 @@ export function RegisterForm() {
       toast.success('Registration successful')
       return { status: 'success' }
     },
-    { status: 'error', errors: { email: '', password: '' } }
+    { status: 'error', errors: { email: '', username: '', password: '' } }
   )
 
   return (
@@ -89,6 +106,18 @@ export function RegisterForm() {
           type="email"
           errorMessage={state.status === 'error' ? state.errors?.email : ''}
           isError={state.status === 'error' && !!state.errors?.email}
+          required
+        />
+      </div>
+      <div className="flex flex-col gap-2.5">
+        <Label htmlFor="username">Username</Label>
+        <InputWithFeedback
+          name="username"
+          id="username"
+          type="text"
+          placeholder="narutouzuma"
+          errorMessage={state.status === 'error' ? state.errors?.username : ''}
+          isError={state.status === 'error' && !!state.errors?.username}
           required
         />
       </div>
