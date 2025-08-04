@@ -42,6 +42,7 @@ export default defineSchema({
     status: v.union(v.literal('countdown'), v.literal('playing'), v.literal('finished')),
     textElementsCollection: v.array(v.array(ElementSchema)), // 5-7 chunks
     startTime: v.optional(v.number()),
+    endTime: v.optional(v.number()),
     durationMs: v.number(), // 60000 for 1 minute
     scheduledEndId: v.optional(v.id('_scheduled_functions')),
   }).index('by_room', ['roomId']),
