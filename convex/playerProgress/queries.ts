@@ -58,12 +58,16 @@ export const getPlayersForGame = query({
   },
 })
 
-export const getPlayerProgress = query({
+export const getCurrentPlayerProgress = query({
   args: {
-    userId: v.id('users'),
     roomId: v.id('rooms'),
   },
-  handler: async (ctx, { userId, roomId }) => {
+  handler: async (ctx, { roomId }) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw sharedErrors.USER_NOT_AUTHENTICATED
+    }
+
     return await ctx.db
       .query('playerProgress')
       .withIndex('by_user_room', (q) => q.eq('userId', userId).eq('roomId', roomId))

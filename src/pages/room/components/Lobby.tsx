@@ -4,6 +4,8 @@ import { useMutation, useQuery } from 'convex/react'
 import { Check, Copy, Crown, Users, X } from 'lucide-react'
 import { useState } from 'react'
 
+import { useRoomAccess } from '../hooks/useRoomAccess'
+
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -102,9 +104,11 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
   const startGame = useMutation(api.games.mutations.startGame)
   const kickPlayer = useMutation(api.rooms.mutations.kickPlayer)
 
-  const isOwner = room?.ownerId === currentUser._id
+  useRoomAccess({ roomId: room._id })
+
+  const isOwner = room.ownerId === currentUser._id
   const canStart = players && players.length >= 2
-  const maxPlayers = room?.maxPlayers || 4
+  const maxPlayers = room.maxPlayers
 
   const handleCopyLink = async () => {
     const roomLink = window.location.href
