@@ -100,7 +100,7 @@ const PodiumItem = ({ player, index, gameStartTime }: PodiumItemProps) => {
           <div className="text-muted-foreground text-xs">
             {player.isFinished && elapsedTime !== undefined
               ? formatTime(elapsedTime)
-              : formatDistance((player.distancePosition / 100) * 100)}
+              : formatDistance((player.distancePosition / GOAL_DISTANCE) * 100)}
           </div>
         </div>
         <div className="text-muted-foreground absolute -bottom-6 text-xs">
@@ -169,7 +169,7 @@ const ResultRow = ({ player, gameStartTime }: ResultRowProps) => {
             <span className="font-medium">
               {player.isFinished && elapsedTime !== undefined
                 ? formatTime(elapsedTime)
-                : formatDistance((player.distancePosition / 100) * 100)}
+                : formatDistance((player.distancePosition / GOAL_DISTANCE) * 100)}
             </span>
           </div>
 

@@ -21,7 +21,7 @@ export function Game({ room, currentUser }: GameProps) {
   return (
     <>
       {(currentGame.status === 'playing' || currentGame.status === 'countdown') && (
-        <InGame currentGame={currentGame} currentUser={currentUser} />
+        <InGame currentGame={currentGame} currentUser={currentUser} currentRoom={room} />
       )}
       {currentGame.status === 'finished' && (
         <GameResults currentGame={currentGame} room={room} currentUser={currentUser} />
