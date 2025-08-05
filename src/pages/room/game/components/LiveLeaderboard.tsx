@@ -1,10 +1,11 @@
 import { api } from '@convex/_generated/api'
 import { Doc } from '@convex/_generated/dataModel'
 import { useQuery } from 'convex/react'
-import { Crown, Trophy } from 'lucide-react'
+import { Crown } from 'lucide-react'
 
 import { getPlayersRanked, LeaderboardPlayer } from '../utils'
 
+import TrophyPng from '@/assets/trophy.png'
 import { cn } from '@/lib/utils'
 
 interface LiveLeaderboardProps {
@@ -95,7 +96,7 @@ export const LiveLeaderboard = ({ currentGame, currentUser }: LiveLeaderboardPro
   return (
     <div className="bg-card/50 border-border rounded-lg border p-3 backdrop-blur-sm">
       <div className="mb-2 flex items-center gap-2">
-        <Trophy className="text-neon-yellow mb-0.5 h-4 w-4" />
+        <img src={TrophyPng} alt="Trophy" className="mb-0.5 size-4" />
         <h3 className="text-foreground text-sm font-semibold">Live Standings</h3>
       </div>
 

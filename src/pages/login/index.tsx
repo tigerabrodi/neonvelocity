@@ -7,6 +7,7 @@ import { generatePath, useNavigate } from 'react-router'
 import { LoginForm } from './components/LoginForm'
 import { RegisterForm } from './components/RegisterForm'
 
+import ArcadePng from '@/assets/arcade.png'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ROUTES, TAB_VALUES } from '@/lib/constants'
@@ -41,6 +42,7 @@ export function LoginPage() {
         <CardHeader className="flex flex-col items-center gap-1">
           <CardTitle className="text-primary flex items-center justify-center gap-2 text-center text-2xl">
             Neon Velocity
+            <img src={ArcadePng} alt="Arcade" className="mb-1 size-9" />
           </CardTitle>
         </CardHeader>
         <CardContent>

@@ -1,13 +1,14 @@
 import { api } from '@convex/_generated/api'
 import { Doc, Id } from '@convex/_generated/dataModel'
 import { useMutation, useQuery } from 'convex/react'
-import { Check, Copy, Crown, Users, X } from 'lucide-react'
+import { Check, Copy, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { generatePath, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useRoomAccess } from './hooks/useRoomAccess'
 
+import CrownPng from '@/assets/crown.png'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/lib/constants'
 import { cn, getErrorMessage, handlePromise } from '@/lib/utils'
@@ -68,7 +69,7 @@ const PlayerSlot = ({ player, index, isOwner, currentUserId, onKickPlayer }: Pla
         ) : (
           <div className="flex items-center gap-2">
             <span className="text-foreground font-medium">{player.playerName}</span>
-            {isPlayerOwner && <Crown className="text-neon-yellow mb-1.5 h-4 w-4" />}
+            {isPlayerOwner && <img src={CrownPng} alt="Crown" className="mb-1 size-5" />}
             {isCurrentPlayer && !isPlayerOwner && (
               <span className="text-primary text-xs">(You)</span>
             )}
