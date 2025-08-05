@@ -30,6 +30,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         maxPlayers: MAX_PLAYERS,
         // since first player progress is always the owner himself
         nextPlayerNumber: 2,
+        currentGameId: null,
       })
 
       await ctx.db.patch(userId, {
