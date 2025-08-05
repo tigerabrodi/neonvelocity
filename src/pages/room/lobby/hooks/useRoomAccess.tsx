@@ -47,11 +47,11 @@ export function useRoomAccess({
     if (!roomEvents) return
 
     for (const event of roomEvents) {
-      if (event.type === 'player_kicked') {
+      if (event.type === 'player_kicked' && event.toUserId === currentUser._id) {
         void handleRemoveCurrentUserFromRoom({ roomEventId: event._id })
       }
     }
-  }, [handleRemoveCurrentUserFromRoom, roomEvents])
+  }, [handleRemoveCurrentUserFromRoom, roomEvents, currentUser._id])
 
   useEffect(() => {
     if (!roomId) return
