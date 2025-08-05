@@ -20,7 +20,7 @@ export const getCurrentGame = query({
       throw roomErrors.ROOM_NOT_FOUND
     }
 
-    if (room.currentGameId === null) {
+    if (!room.currentGameId) {
       return null
     }
 
