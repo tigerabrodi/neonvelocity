@@ -35,7 +35,7 @@ export default defineSchema({
     createdAt: v.number(),
     maxPlayers: v.number(), // 4
     nextPlayerNumber: v.number(), // 1-4, next available player number to assign
-    currentGameId: v.union(v.id('games'), v.null()),
+    currentGameId: v.optional(v.id('games')),
   }).index('by_owner', ['ownerId']),
 
   games: defineTable({
@@ -56,7 +56,7 @@ export default defineSchema({
   }).index('by_room', ['roomId']),
 
   playerProgress: defineTable({
-    gameId: v.union(v.id('games'), v.null()), // null when in lobby, set when game starts
+    gameId: v.optional(v.id('games')), // null when in lobby, set when game starts
     roomId: v.id('rooms'), // always present - which room they're in
     userId: v.id('users'),
     playerName: v.string(), // derived from users.username but stored for convenience
