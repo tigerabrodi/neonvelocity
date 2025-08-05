@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  --color-player-1: hsl(180 100% 50%);
+  --color-player-2: hsl(270 100% 70%);
+  --color-player-3: hsl(320 100% 70%);
+  --color-player-4: hsl(30 100% 60%);
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 html,
@@ -74,12 +82,6 @@ button {
   --color-neon-blue: hsl(220 100% 60%);
   --color-neon-orange: hsl(30 100% 60%);
   --color-neon-yellow: hsl(60 100% 70%);
-  
-  /* Racing Player Colors */
-  --color-player-1: hsl(180 100% 50%);
-  --color-player-2: hsl(270 100% 70%);
-  --color-player-3: hsl(320 100% 70%);
-  --color-player-4: hsl(30 100% 60%);
 }
 
 :root {
