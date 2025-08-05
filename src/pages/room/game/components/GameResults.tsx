@@ -1,5 +1,6 @@
 import { api } from '@convex/_generated/api'
 import { Doc } from '@convex/_generated/dataModel'
+import { GOAL_DISTANCE } from '@convex/games/mutations'
 import { useMutation, useQuery } from 'convex/react'
 import { Award, Medal, Timer, Trophy } from 'lucide-react'
 import { generatePath, useNavigate } from 'react-router'
@@ -164,7 +165,7 @@ const ResultRow = ({ player, gameStartTime }: ResultRowProps) => {
         {/* Stats */}
         <div className="flex items-center gap-6 text-sm">
           <div className="flex items-center gap-1">
-            <Timer className="text-primary h-4 w-4" />
+            <Timer className="text-primary mb-1 h-4 w-4" />
             <span className="font-medium">
               {player.isFinished && elapsedTime !== undefined
                 ? formatTime(elapsedTime)
@@ -172,7 +173,9 @@ const ResultRow = ({ player, gameStartTime }: ResultRowProps) => {
             </span>
           </div>
 
-          <div className="text-muted-foreground">{player.distancePosition}%</div>
+          <div className="text-muted-foreground">
+            {Math.round((player.distancePosition / GOAL_DISTANCE) * 100)}%
+          </div>
 
           <div className="text-muted-foreground">{player.totalCharactersTyped} chars</div>
         </div>
