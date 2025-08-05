@@ -1,6 +1,7 @@
 import { api } from '@convex/_generated/api'
 import { Doc } from '@convex/_generated/dataModel'
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
+import { toast } from 'sonner'
 
 import { BottomPersonalStats } from './BottomPersonalStats'
 import { GameTimer } from './GameTimer'
@@ -8,15 +9,33 @@ import { LiveLeaderboard } from './LiveLeaderboard'
 import { PlayerCar } from './PlayerCar'
 import { TypingArea } from './TypingArea'
 
+import { Button } from '@/components/ui/button'
+import { getErrorMessage, handlePromise } from '@/lib/utils'
+
 type InGameProps = {
   currentGame: Doc<'games'>
+  currentRoom: Doc<'rooms'>
   currentUser: Doc<'users'>
 }
 
-export function InGame({ currentGame, currentUser }: InGameProps) {
+export function InGame({ currentGame, currentUser, currentRoom }: InGameProps) {
   const playerProgresses = useQuery(api.playerProgress.queries.getPlayersForGame, {
     gameId: currentGame._id,
   })
+
+  const resetGame = useMutation(api.rooms.mutations.resetGame)
+
+  const handleResetGame = async () => {
+    const [error] = await handlePromise(
+      resetGame({ roomId: currentRoom._id, ownerId: currentUser._id })
+    )
+
+    if (error) {
+      toast.error(getErrorMessage({ error }))
+    }
+  }
+
+  const isOwner = currentRoom.ownerId === currentUser._id
 
   return (
     <div className="bg-background min-h-screen p-4">
@@ -27,6 +46,8 @@ export function InGame({ currentGame, currentUser }: InGameProps) {
             <h1 className="text-primary text-3xl font-bold">Neon Velocity</h1>
           </div>
           <div className="flex items-start gap-4">
+            {isOwner && <Button onClick={handleResetGame}>Reset Game</Button>}
+
             <LiveLeaderboard currentGame={currentGame} currentUser={currentUser} />
             <GameTimer
               gameStartTime={currentGame.startTime ?? null}
