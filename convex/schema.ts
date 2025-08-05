@@ -3,7 +3,7 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 // Text element structure
-const ElementSchema = v.union(
+export const ElementSchema = v.union(
   v.object({
     type: v.literal('word'),
     letters: v.array(v.string()),
@@ -35,6 +35,7 @@ export default defineSchema({
     createdAt: v.number(),
     maxPlayers: v.number(), // 4
     nextPlayerNumber: v.number(), // 1-4, next available player number to assign
+    currentGameId: v.union(v.id('games'), v.null()),
   }).index('by_owner', ['ownerId']),
 
   games: defineTable({
@@ -45,6 +46,13 @@ export default defineSchema({
     endTime: v.optional(v.number()),
     durationMs: v.number(), // 60000 for 1 minute
     scheduledEndId: v.optional(v.id('_scheduled_functions')),
+  }).index('by_room', ['roomId']),
+
+  roomEvents: defineTable({
+    roomId: v.id('rooms'),
+    type: v.union(v.literal('player_kicked')),
+    fromUserId: v.id('users'),
+    toUserId: v.id('users'),
   }).index('by_room', ['roomId']),
 
   playerProgress: defineTable({
