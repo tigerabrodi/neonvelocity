@@ -1,8 +1,7 @@
 import { Doc } from '@convex/_generated/dataModel'
+import { GOAL_DISTANCE } from '@convex/games/mutations'
 import { Car } from 'lucide-react'
 import { motion } from 'motion/react'
-
-import { GOAL_DISTANCE } from '@/lib/constants'
 
 interface PlayerCarProps {
   playerProgress: Doc<'playerProgress'>

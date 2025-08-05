@@ -1,6 +1,5 @@
 import { Doc } from '@convex/_generated/dataModel'
-
-import { GOAL_DISTANCE } from '@/lib/constants'
+import { GOAL_DISTANCE } from '@convex/games/mutations'
 
 export type LeaderboardPlayer = Doc<'playerProgress'> & {
   progressPercentage: number

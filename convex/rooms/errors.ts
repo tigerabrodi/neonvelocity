@@ -29,4 +29,8 @@ export const roomErrors = {
     code: 'ROOM_IS_FULL',
     message: 'Room is full',
   }),
+  NOT_AUTHORIZED_TO_RESET_GAME: new ErrorWithCode({
+    code: 'NOT_AUTHORIZED_TO_RESET_GAME',
+    message: 'Not authorized to reset game',
+  }),
 } as const

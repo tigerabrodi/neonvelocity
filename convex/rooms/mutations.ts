@@ -43,7 +43,7 @@ export const playAgain = mutation({
     }
 
     // Reset room to lobby
-    await ctx.db.patch(roomId, { status: 'lobby', currentGameId: null })
+    await ctx.db.patch(roomId, { status: 'lobby', currentGameId: undefined })
 
     // Reset all player progress in room
     const players = await ctx.db
@@ -53,7 +53,7 @@ export const playAgain = mutation({
 
     for (const player of players) {
       await ctx.db.patch(player._id, {
-        gameId: null,
+        gameId: undefined,
         currentTextIndex: 0,
         currentElementIndex: 0,
         currentLetterIndex: 0,
@@ -140,7 +140,7 @@ export const joinRoom = mutation({
 
     // Create player progress
     await ctx.db.insert('playerProgress', {
-      gameId: null, // in lobby
+      gameId: undefined, // in lobby
       roomId,
       userId,
       playerName: user.username,
@@ -198,5 +198,61 @@ export const kickPlayerEvent = mutation({
       roomId,
       type: 'player_kicked',
     })
+  },
+})
+
+export const resetGame = mutation({
+  args: {
+    roomId: v.id('rooms'),
+    ownerId: v.id('users'),
+  },
+  handler: async (ctx, { roomId, ownerId }) => {
+    // Verify ownership
+    const room = await ctx.db.get(roomId)
+    if (!room || room.ownerId !== ownerId) {
+      throw roomErrors.NOT_AUTHORIZED_TO_RESET_GAME
+    }
+
+    // Get current game to cancel scheduled function
+    const currentGame = await ctx.db
+      .query('games')
+      .withIndex('by_room', (q) => q.eq('roomId', roomId))
+      .order('desc')
+      .first()
+
+    if (currentGame?.scheduledEndId) {
+      await ctx.scheduler.cancel(currentGame.scheduledEndId)
+    }
+
+    // Reset all player progress in room
+    const players = await ctx.db
+      .query('playerProgress')
+      .withIndex('by_room', (q) => q.eq('roomId', roomId))
+      .collect()
+
+    for (const player of players) {
+      await ctx.db.patch(player._id, {
+        gameId: undefined, // Back to lobby state
+        currentTextIndex: 0,
+        currentElementIndex: 0,
+        currentLetterIndex: 0,
+        totalCharactersTyped: 0,
+        currentStreak: 0,
+        distancePosition: 0,
+        isFinished: false,
+        finishTime: undefined,
+      })
+    }
+
+    // Reset room to lobby
+    await ctx.db.patch(roomId, {
+      status: 'lobby',
+      currentGameId: undefined, // Clear game reference
+    })
+
+    // Delete the game
+    if (currentGame) {
+      await ctx.db.delete(currentGame._id)
+    }
   },
 })

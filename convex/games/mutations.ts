@@ -8,6 +8,8 @@ import { sharedErrors } from '../errors'
 
 import { gameErrors } from './errors'
 
+export const GOAL_DISTANCE = 500
+
 export const typeCharacter = mutation({
   args: {
     gameId: v.id('games'),
@@ -124,11 +126,12 @@ export const typeCharacter = mutation({
      * - After:  distance = 30 * 1.0 = 30 (drops by 60 units!)
      * - This creates a harsh penalty that becomes more severe with higher streaks
      *******************************************************************************/
-    const streakMultiplier = Math.min(newStreak / 10 + 1, 3)
+    // const streakMultiplier = Math.min(newStreak / 10 + 1, 3)
+    const streakMultiplier = newStreak < 3 ? 0 : Math.min(newStreak / 10 + 1, 3)
     const newDistance = newTotalChars * streakMultiplier
 
     // Check if finished (reached goal distance)
-    const isFinished = newDistance >= 100
+    const isFinished = newDistance >= GOAL_DISTANCE
 
     // Update player progress
     await ctx.db.patch(playerProgress._id, {
@@ -141,6 +144,28 @@ export const typeCharacter = mutation({
       isFinished,
       finishTime: isFinished ? Date.now() : undefined,
     })
+
+    // Add this after updating player progress in typeCharacter
+    if (isFinished) {
+      // Check if all players have finished
+      const allPlayers = await ctx.db
+        .query('playerProgress')
+        .withIndex('by_game', (q) => q.eq('gameId', gameId))
+        .collect()
+
+      const hasAllPlayersFinished = allPlayers.every((player) => player.isFinished)
+
+      if (hasAllPlayersFinished) {
+        // Cancel the scheduled end function
+        const game = await ctx.db.get(gameId)
+        if (game?.scheduledEndId) {
+          await ctx.scheduler.cancel(game.scheduledEndId)
+        }
+
+        // End the game immediately
+        await ctx.scheduler.runAfter(0, internal.games.mutations.endGame, { gameId })
+      }
+    }
   },
 })
 
