@@ -24,6 +24,7 @@ import type * as passwordProvider from "../passwordProvider.js";
 import type * as playerProgress_mutations from "../playerProgress/mutations.js";
 import type * as playerProgress_queries from "../playerProgress/queries.js";
 import type * as playerProgress_utils from "../playerProgress/utils.js";
+import type * as rooms_errors from "../rooms/errors.js";
 import type * as rooms_mutations from "../rooms/mutations.js";
 import type * as rooms_queries from "../rooms/queries.js";
 import type * as users_mutations from "../users/mutations.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "playerProgress/mutations": typeof playerProgress_mutations;
   "playerProgress/queries": typeof playerProgress_queries;
   "playerProgress/utils": typeof playerProgress_utils;
+  "rooms/errors": typeof rooms_errors;
   "rooms/mutations": typeof rooms_mutations;
   "rooms/queries": typeof rooms_queries;
   "users/mutations": typeof users_mutations;

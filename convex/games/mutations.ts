@@ -144,13 +144,15 @@ export const typeCharacter = mutation({
   },
 })
 
+const DEFAULT_DURATION_MS = 60000 // 1 min
+
 export const startGame = mutation({
   args: {
     roomId: v.id('rooms'),
     ownerId: v.id('users'),
     durationMs: v.optional(v.number()), // defaults to 60000
   },
-  handler: async (ctx, { roomId, ownerId, durationMs = 60000 }) => {
+  handler: async (ctx, { roomId, ownerId, durationMs = DEFAULT_DURATION_MS * 5 }) => {
     // Verify ownership
     const room = await ctx.db.get(roomId)
     if (!room || room.ownerId !== ownerId) {
@@ -178,8 +180,8 @@ export const startGame = mutation({
     })
 
     // Update room status
-    await ctx.db.patch(roomId, { status: 'playing' })
 
+    await ctx.db.patch(roomId, { status: 'playing', currentGameId: gameId })
     // Update all players in room to reference this game
     const players = await ctx.db
       .query('playerProgress')

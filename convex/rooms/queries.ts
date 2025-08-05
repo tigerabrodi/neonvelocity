@@ -30,3 +30,13 @@ export const getRoomById = query({
     return await ctx.db.get(roomId)
   },
 })
+
+export const getRoomEvents = query({
+  args: { roomId: v.id('rooms') },
+  handler: async (ctx, { roomId }) => {
+    return await ctx.db
+      .query('roomEvents')
+      .withIndex('by_room', (q) => q.eq('roomId', roomId))
+      .collect()
+  },
+})

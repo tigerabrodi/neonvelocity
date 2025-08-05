@@ -1,8 +1,11 @@
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { ConvexError, v } from 'convex/values'
+import { v } from 'convex/values'
 
 import { mutation } from '../_generated/server'
+import { sharedErrors } from '../errors'
 import { removePlayerAndReorder } from '../playerProgress/utils'
+
+import { roomErrors } from './errors'
 
 export const ROOM_ERRORS = {
   OWNER_CANT_LEAVE_ACTIVE_GAME: {
@@ -30,17 +33,17 @@ export const playAgain = mutation({
   handler: async (ctx, { roomId }) => {
     const userId = await getAuthUserId(ctx)
     if (!userId) {
-      throw new Error('User not authenticated')
+      throw sharedErrors.USER_NOT_AUTHENTICATED
     }
 
     // Verify ownership
     const room = await ctx.db.get(roomId)
     if (!room || room.ownerId !== userId) {
-      throw new Error('Not authorized')
+      throw roomErrors.NOT_AUTHORIZED_TO_START_GAME
     }
 
     // Reset room to lobby
-    await ctx.db.patch(roomId, { status: 'lobby' })
+    await ctx.db.patch(roomId, { status: 'lobby', currentGameId: null })
 
     // Reset all player progress in room
     const players = await ctx.db
@@ -49,9 +52,8 @@ export const playAgain = mutation({
       .collect()
 
     for (const player of players) {
-      // eslint-disable-next-line no-await-in-loop
       await ctx.db.patch(player._id, {
-        gameId: undefined,
+        gameId: null,
         currentTextIndex: 0,
         currentElementIndex: 0,
         currentLetterIndex: 0,
@@ -65,25 +67,25 @@ export const playAgain = mutation({
   },
 })
 
-export const kickPlayer = mutation({
+export const removeCurrentUserFromRoom = mutation({
   args: {
     roomId: v.id('rooms'),
-    targetUserId: v.id('users'),
+    roomEventId: v.id('roomEvents'),
   },
-  handler: async (ctx, { roomId, targetUserId }) => {
+  handler: async (ctx, { roomId, roomEventId }) => {
     const userId = await getAuthUserId(ctx)
     if (!userId) {
-      throw new Error('User not authenticated')
-    }
-
-    // Verify ownership
-    const room = await ctx.db.get(roomId)
-    if (!room || room.ownerId !== userId) {
-      throw new Error('Not authorized to kick players')
+      throw sharedErrors.USER_NOT_AUTHENTICATED
     }
 
     // Remove target player and reorder
-    await removePlayerAndReorder({ ctx, roomId, userId: targetUserId })
+    await removePlayerAndReorder({ ctx, roomId, userId: userId })
+
+    // Check if room event exists before trying to delete it
+    const roomEvent = await ctx.db.get(roomEventId)
+    if (roomEvent) {
+      await ctx.db.delete(roomEventId)
+    }
   },
 })
 
@@ -95,7 +97,7 @@ export const joinRoom = mutation({
   handler: async (ctx, { roomId }) => {
     const userId = await getAuthUserId(ctx)
     if (!userId) {
-      throw new Error('User not authenticated')
+      throw sharedErrors.USER_NOT_AUTHENTICATED
     }
 
     // Check if user already in room
@@ -110,34 +112,28 @@ export const joinRoom = mutation({
 
     // Get room and validate
     const room = await ctx.db.get(roomId)
-    if (!room) throw new Error('Room not found')
+    if (!room) throw roomErrors.ROOM_NOT_FOUND
 
     const isOwner = room.ownerId === userId
 
     // If owner and their room is playing, they can't leave - redirect them back
     if (isOwner && room.status === 'playing') {
-      throw new ConvexError({
-        code: 'OWNER_CANT_LEAVE_ACTIVE_GAME',
-        message: 'Owner cannot leave active game',
-      })
+      throw roomErrors.OWNER_CANT_LEAVE_ACTIVE_GAME
     }
 
     // If room is playing and user is not owner, they can't join
     if (room.status === 'playing' && !isOwner) {
-      throw new ConvexError({
-        code: 'CANT_JOIN_ACTIVE_GAME',
-        message: 'Cannot join active game',
-      })
+      throw roomErrors.CANT_JOIN_ACTIVE_GAME
     }
 
     const isRoomFull = room.nextPlayerNumber > room.maxPlayers
     if (isRoomFull) {
-      throw new Error('Room is full')
+      throw roomErrors.ROOM_IS_FULL
     }
 
     // Get user for name
     const user = await ctx.db.get(userId)
-    if (!user) throw new Error('User not found')
+    if (!user) throw new Error('SHOULD NEVER HAPPEN')
 
     // Assign player number
     const assignedPlayerNumber = room.nextPlayerNumber
@@ -171,9 +167,36 @@ export const leaveRoom = mutation({
   handler: async (ctx, { roomId }) => {
     const userId = await getAuthUserId(ctx)
     if (!userId) {
-      throw new Error('User not authenticated')
+      throw sharedErrors.USER_NOT_AUTHENTICATED
     }
 
     await removePlayerAndReorder({ ctx, roomId, userId })
+  },
+})
+
+export const kickPlayerEvent = mutation({
+  args: {
+    roomId: v.id('rooms'),
+    targetUserId: v.id('users'),
+  },
+  handler: async (ctx, { roomId, targetUserId }) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) {
+      throw sharedErrors.USER_NOT_AUTHENTICATED
+    }
+
+    const room = await ctx.db.get(roomId)
+    if (!room) throw roomErrors.ROOM_NOT_FOUND
+
+    if (room.ownerId !== userId) {
+      throw roomErrors.NOT_AUTHORIZED_TO_KICK_PLAYER
+    }
+
+    await ctx.db.insert('roomEvents', {
+      fromUserId: userId,
+      toUserId: targetUserId,
+      roomId,
+      type: 'player_kicked',
+    })
   },
 })

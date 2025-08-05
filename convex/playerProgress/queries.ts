@@ -39,6 +39,7 @@ export const getTextForPlayer = query({
       currentElement,
       currentChunk,
       playerProgress,
+      textElementsCollection: game.textElementsCollection,
     }
   },
 })
