@@ -4,8 +4,8 @@ import { useQuery } from 'convex/react'
 import { Loader2 } from 'lucide-react'
 import { generatePath, Navigate, useParams } from 'react-router'
 
-import { Game } from './components/Game'
-import { Lobby } from './components/Lobby'
+import { Game } from './game/Game'
+import { Lobby } from './lobby/Lobby'
 
 import { useAuthLayoutContext } from '@/layouts/authenticated/hooks/useAuthLayoutContext'
 import { ROUTES } from '@/lib/constants'
@@ -31,5 +31,9 @@ export const RoomPage = () => {
 
   const shouldShowLobby = room.status === 'lobby'
 
-  return shouldShowLobby ? <Lobby room={room} currentUser={currentUser} /> : <Game />
+  return shouldShowLobby ? (
+    <Lobby room={room} currentUser={currentUser} />
+  ) : (
+    <Game room={room} currentUser={currentUser} />
+  )
 }

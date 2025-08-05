@@ -3,14 +3,14 @@ import { Doc, Id } from '@convex/_generated/dataModel'
 import { useMutation, useQuery } from 'convex/react'
 import { Check, Copy, Crown, Users, X } from 'lucide-react'
 import { useState } from 'react'
+import { generatePath, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import { useRoomAccess } from '../hooks/useRoomAccess'
+import { useRoomAccess } from './hooks/useRoomAccess'
 
 import { Button } from '@/components/ui/button'
+import { ROUTES } from '@/lib/constants'
 import { cn, getErrorMessage, handlePromise } from '@/lib/utils'
-
-const DEFAULT_ROOM_DURATION_MS = 60000
 
 interface PlayerSlotProps {
   player?: Doc<'playerProgress'>
@@ -100,13 +100,14 @@ const COPY_LINK_TIMEOUT = 2000
 
 export const Lobby = ({ room, currentUser }: PlayerListProps) => {
   const [isCopied, setIsCopied] = useState(false)
+  const navigate = useNavigate()
 
   const players = useQuery(api.rooms.queries.getPlayersInRoom, { roomId: room._id })
   const startGame = useMutation(api.games.mutations.startGame)
-  const kickPlayer = useMutation(api.rooms.mutations.kickPlayer)
+  const kickPlayer = useMutation(api.rooms.mutations.kickPlayerEvent)
   const leaveRoom = useMutation(api.rooms.mutations.leaveRoom)
 
-  useRoomAccess({ roomId: room._id })
+  useRoomAccess({ roomId: room._id, currentUser })
 
   const isOwner = room.ownerId === currentUser._id
   const canStart = players && players.length >= 2
@@ -126,7 +127,6 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
       startGame({
         roomId: room._id,
         ownerId: currentUser._id,
-        durationMs: DEFAULT_ROOM_DURATION_MS,
       })
     )
 
@@ -161,6 +161,8 @@ export const Lobby = ({ room, currentUser }: PlayerListProps) => {
     if (error) {
       toast.error(getErrorMessage({ error, fallbackText: 'Failed to leave room' }))
     }
+
+    void navigate(generatePath(ROUTES.roomDetail, { roomId: currentUser.roomId }))
   }
 
   // Sort players by playerNumber
